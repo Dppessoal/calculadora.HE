@@ -3,77 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora DP - Ajuste Preciso</title>
+    <title>Calculadora DP Pro - Recibo Oficial</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-        h2 { text-align: center; color: #1a73e8; margin-bottom: 25px; }
-        .section-title { font-size: 13px; color: #5f6368; text-transform: uppercase; margin: 20px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; font-weight: 600; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
-        button { width: 100%; padding: 15px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
-        .result-box { margin-top: 20px; padding: 15px; background-color: #fffbe6; border-left: 5px solid #ffc107; border-radius: 4px; display: none; }
-        .result-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
-        .total-line { border-top: 1px solid #ccc; padding-top: 10px; font-weight: bold; font-size: 18px; color: #d93025; }
-        small { color: #666; font-size: 11px; display: block; margin-top: -10px; margin-bottom: 10px; }
+        :root { --primary: #1a73e8; --secondary: #5f6368; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        h2 { text-align: center; color: var(--primary); margin-bottom: 25px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        .section-title { font-size: 12px; color: var(--primary); text-transform: uppercase; margin: 20px 0 10px; font-weight: bold; letter-spacing: 1px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; font-weight: 600; color: #333; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #dadce0; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { flex: 1; padding: 16px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-calc { background-color: var(--primary); color: white; }
+        .btn-pdf { background-color: #2e7d32; color: white; display: none; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* ESTILO DO RECIBO PARA O PDF */
+        #recibo-template { display: none; font-family: Arial, sans-serif; color: #000; padding: 20px; }
+        .header-recibo { border: 1px solid #000; padding: 15px; margin-bottom: 10px; }
+        .header-recibo h3 { margin: 0; text-transform: uppercase; font-size: 18px; }
+        .header-recibo p { margin: 5px 0; font-size: 14px; }
+        .info-tab { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        .info-tab td { border: 1px solid #000; padding: 8px; font-size: 13px; }
+        .table-calculo { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .table-calculo th, .table-calculo td { border: 1px solid #000; padding: 10px; text-align: left; font-size: 13px; }
+        .table-calculo th { background-color: #f2f2f2; }
+        .footer-recibo { margin-top: 40px; }
+        .assinatura-box { margin-top: 60px; border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 5px; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Calculadora de Eventos DP</h2>
+    <h2>Calculadora de DP</h2>
 
-    <div class="section-title">1. Período e Calendário</div>
+    <div class="section-title">Dados da Empresa</div>
+    <label>Nome da Empresa:</label>
+    <input type="text" id="empresa" placeholder="Ex: R G TAVARES DROGARIA LTDA">
+    <label>CNPJ:</label>
+    <input type="text" id="cnpj" placeholder="00.000.000/0001-00">
+
+    <div class="section-title">Dados do Funcionário</div>
+    <label>Nome Completo:</label>
+    <input type="text" id="nome" placeholder="Nome do colaborador">
+    
+    <div class="section-title">Calendário e Proventos</div>
     <label>Mês de Referência:</label>
     <input type="month" id="mesRef" onchange="sugerirDias()">
     
     <div class="grid">
+        <div><label>Dias Úteis:</label><input type="number" id="diasUteis"></div>
+        <div><label>DSR (Dom/Fer):</label><input type="number" id="dsr"></div>
+    </div>
+
+    <div class="grid">
+        <div><label>Salário Base (R$):</label><input type="number" id="salario" step="0.01"></div>
+        <div><label>Jornada (Hrs):</label><input type="number" id="jornada" value="220"></div>
+    </div>
+
+    <div class="grid">
         <div>
-            <label>Dias Úteis:</label>
-            <input type="number" id="diasUteis" placeholder="Ex: 24">
+            <label>Tipo:</label>
+            <select id="tipo">
+                <option value="HE">Hora Extra</option>
+                <option value="AN">Adicional Noturno</option>
+            </select>
         </div>
         <div>
-            <label>DSR (Dom/Fer):</label>
-            <input type="number" id="dsr" placeholder="Ex: 6">
+            <label>Porcentagem:</label>
+            <select id="perc">
+                <option value="0.20">20%</option>
+                <option value="0.50" selected>50%</option>
+                <option value="0.60">60%</option>
+                <option value="0.70">70%</option>
+                <option value="1.00">100%</option>
+            </select>
         </div>
     </div>
-    <small>* O sistema sugere, mas você pode alterar para bater com seu calendário local.</small>
+    
+    <label>Quantidade de Horas (Decimal):</label>
+    <input type="number" id="qtd" step="0.01" placeholder="Ex: 15.50">
 
-    <div class="section-title">2. Dados do Colaborador</div>
-    <label>Salário Base (R$):</label>
-    <input type="number" id="salario" step="0.01">
+    <div class="btn-group">
+        <button class="btn-calc" onclick="calcular()">Calcular Valores</button>
+        <button id="btnPDF" class="btn-pdf" onclick="gerarPDF()">Gerar Recibo Oficial</button>
+    </div>
+</div>
 
-    <label>Jornada Mensal:</label>
-    <input type="number" id="jornada" value="220">
+<div id="recibo-template">
+    <div class="header-recibo">
+        <h3 id="pdf-empresa-nome"></h3>
+        <p><strong>CNPJ:</strong> <span id="pdf-empresa-cnpj"></span></p>
+        <p style="text-align: right; margin-top: -25px;"><strong>RECIBO DE PAGAMENTO</strong></p>
+    </div>
 
-    <div class="section-title">3. Adicionais</div>
-    <label>Tipo de Verba:</label>
-    <select id="tipo">
-        <option value="HE">Hora Extra</option>
-        <option value="AN">Adicional Noturno</option>
-    </select>
+    <table class="info-tab">
+        <tr>
+            <td width="70%"><strong>NOME DO FUNCIONÁRIO:</strong> <br><span id="pdf-func-nome"></span></td>
+            <td width="30%"><strong>REFERÊNCIA:</strong> <br><span id="pdf-referencia"></span></td>
+        </tr>
+    </table>
 
-    <label>Porcentagem:</label>
-    <select id="perc">
-        <option value="0.20">20%</option>
-        <option value="0.50" selected>50%</option>
-        <option value="0.60">60%</option>
-        <option value="0.70">70%</option>
-        <option value="0.80">80%</option>
-        <option value="0.90">90%</option>
-        <option value="1.00">100%</option>
-    </select>
+    <table class="table-calculo">
+        <thead>
+            <tr>
+                <th>Cód.</th>
+                <th>Descrição do Evento</th>
+                <th>Referência</th>
+                <th>Proventos (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>SALÁRIO BASE / HORA</td>
+                <td id="pdf-ref-base"></td>
+                <td id="pdf-val-base">---</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td id="pdf-tipo-txt"></td>
+                <td id="pdf-ref-qtd"></td>
+                <td id="pdf-val-evento"></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>REFLEXO DE DSR SOBRE ADICIONAIS</td>
+                <td id="pdf-ref-dsr-dias"></td>
+                <td id="pdf-val-dsr"></td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #eee; font-weight: bold;">
+                <td colspan="3" style="text-align: right;">VALOR LÍQUIDO A RECEBER:</td>
+                <td id="pdf-val-total"></td>
+            </tr>
+        </tfoot>
+    </table>
 
-    <label>Quantidade de Horas (Centimal):</label>
-    <input type="number" id="qtd" step="0.01" placeholder="Ex: 10.50">
-
-    <button onclick="calcular()">Calcular Agora</button>
-
-    <div id="res" class="result-box">
-        <div class="result-line"><span>Provento Bruto:</span> <span id="vHE"></span></div>
-        <div class="result-line"><span>Reflexo DSR:</span> <span id="vDSR"></span></div>
-        <div class="result-line total-line"><span>Total a Pagar:</span> <span id="vTotal"></span></div>
+    <div class="footer-recibo">
+        <p style="font-size: 12px;">Declaro ter recebido a importância líquida discriminada neste recibo.</p>
+        <p style="text-align: right;">Data: ____/____/_______</p>
+        <div class="assinatura-box">
+            Assinatura do Funcionário
+        </div>
     </div>
 </div>
 
@@ -81,22 +156,20 @@
     function sugerirDias() {
         const data = document.getElementById('mesRef').value;
         if (!data) return;
-        
         const [ano, mes] = data.split('-');
         const ultimoDia = new Date(ano, mes, 0).getDate();
         let domingos = 0;
-
         for (let i = 1; i <= ultimoDia; i++) {
             if (new Date(ano, mes - 1, i).getDay() === 0) domingos++;
         }
-
-        // Sugestão padrão (Dias totais - domingos). 
-        // O usuário ajusta os feriados manualmente para precisão de 100%.
         document.getElementById('dsr').value = domingos;
         document.getElementById('diasUteis').value = ultimoDia - domingos;
     }
 
     function calcular() {
+        const empresa = document.getElementById('empresa').value;
+        const cnpj = document.getElementById('cnpj').value;
+        const nome = document.getElementById('nome').value;
         const salario = parseFloat(document.getElementById('salario').value);
         const jornada = parseFloat(document.getElementById('jornada').value);
         const qtd = parseFloat(document.getElementById('qtd').value);
@@ -104,25 +177,46 @@
         const tipo = document.getElementById('tipo').value;
         const dUteis = parseFloat(document.getElementById('diasUteis').value);
         const dDsr = parseFloat(document.getElementById('dsr').value);
+        const mesRef = document.getElementById('mesRef').value;
 
-        if (!salario || !qtd || !dUteis || !dDsr) {
-            alert("Preencha todos os campos!");
-            return;
-        }
+        if (!salario || !qtd || !nome) { alert("Preencha Nome, Salário e Quantidade!"); return; }
 
-        const valorHoraBase = salario / jornada;
-        let valorEvento = (tipo === "HE") ? (valorHoraBase * (1 + perc)) * qtd : (valorHoraBase * perc) * qtd;
+        const vHoraBase = salario / jornada;
+        const vEvento = (tipo === "HE") ? (vHoraBase * (1 + perc)) * qtd : (vHoraBase * perc) * qtd;
+        const vDsr = (vEvento / dUteis) * dDsr;
+        const total = vEvento + vDsr;
+
+        // Alimentar PDF
+        document.getElementById('pdf-empresa-nome').innerText = empresa || "NOME DA EMPRESA NÃO INFORMADO";
+        document.getElementById('pdf-empresa-cnpj').innerText = cnpj || "00.000.000/0000-00";
+        document.getElementById('pdf-func-nome').innerText = nome.toUpperCase();
+        document.getElementById('pdf-referencia').innerText = mesRef;
+        document.getElementById('pdf-ref-base').innerText = jornada + " hrs";
+        document.getElementById('pdf-val-base').innerText = vHoraBase.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        document.getElementById('pdf-tipo-txt').innerText = (tipo === "HE" ? "HORAS EXTRAS " : "ADICIONAL NOTURNO ") + (perc*100) + "%";
+        document.getElementById('pdf-ref-qtd').innerText = qtd.toFixed(2) + " hrs";
+        document.getElementById('pdf-val-evento').innerText = vEvento.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        document.getElementById('pdf-ref-dsr-dias').innerText = dUteis + " Úteis / " + dDsr + " DSR";
+        document.getElementById('pdf-val-dsr').innerText = vDsr.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        document.getElementById('pdf-val-total').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+
+        document.getElementById('btnPDF').style.display = 'block';
+        alert("Cálculo Finalizado! Clique em Gerar Recibo.");
+    }
+
+    function gerarPDF() {
+        const element = document.getElementById('recibo-template');
+        element.style.display = 'block';
+        const nomeArquivo = document.getElementById('nome').value.replace(/\s+/g, '_');
         
-        // FÓRMULA DP: (Valor das Horas / Dias Úteis) * DSR
-        const valorDSR = (valorEvento / dUteis) * dDsr;
-        const total = valorEvento + valorDSR;
-
-        document.getElementById('vHE').innerText = "R$ " + valorEvento.toLocaleString('pt-BR', {minimumFractionDigits:2});
-        document.getElementById('vDSR').innerText = "R$ " + valorDSR.toLocaleString('pt-BR', {minimumFractionDigits:2});
-        document.getElementById('vTotal').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits:2});
-        document.getElementById('res').style.display = 'block';
+        html2pdf().set({
+            margin: 15,
+            filename: `Recibo_${nomeArquivo}.pdf`,
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(element).save().then(() => {
+            element.style.display = 'none';
+        });
     }
 </script>
-
 </body>
 </html>
