@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora DP - Ajuste Preciso</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { text-align: center; color: #1a73e8; margin-bottom: 25px; }
+        .section-title { font-size: 13px; color: #5f6368; text-transform: uppercase; margin: 20px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; font-weight: 600; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
+        button { width: 100%; padding: 15px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        .result-box { margin-top: 20px; padding: 15px; background-color: #fffbe6; border-left: 5px solid #ffc107; border-radius: 4px; display: none; }
+        .result-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
+        .total-line { border-top: 1px solid #ccc; padding-top: 10px; font-weight: bold; font-size: 18px; color: #d93025; }
+        small { color: #666; font-size: 11px; display: block; margin-top: -10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Calculadora de Eventos DP</h2>
+
+    <div class="section-title">1. Período e Calendário</div>
+    <label>Mês de Referência:</label>
+    <input type="month" id="mesRef" onchange="sugerirDias()">
+    
+    <div class="grid">
+        <div>
+            <label>Dias Úteis:</label>
+            <input type="number" id="diasUteis" placeholder="Ex: 24">
+        </div>
+        <div>
+            <label>DSR (Dom/Fer):</label>
+            <input type="number" id="dsr" placeholder="Ex: 6">
+        </div>
+    </div>
+    <small>* O sistema sugere, mas você pode alterar para bater com seu calendário local.</small>
+
+    <div class="section-title">2. Dados do Colaborador</div>
+    <label>Salário Base (R$):</label>
+    <input type="number" id="salario" step="0.01">
+
+    <label>Jornada Mensal:</label>
+    <input type="number" id="jornada" value="220">
+
+    <div class="section-title">3. Adicionais</div>
+    <label>Tipo de Verba:</label>
+    <select id="tipo">
+        <option value="HE">Hora Extra</option>
+        <option value="AN">Adicional Noturno</option>
+    </select>
+
+    <label>Porcentagem:</label>
+    <select id="perc">
+        <option value="0.20">20%</option>
+        <option value="0.50" selected>50%</option>
+        <option value="0.60">60%</option>
+        <option value="0.70">70%</option>
+        <option value="0.80">80%</option>
+        <option value="0.90">90%</option>
+        <option value="1.00">100%</option>
+    </select>
+
+    <label>Quantidade de Horas (Centimal):</label>
+    <input type="number" id="qtd" step="0.01" placeholder="Ex: 10.50">
+
+    <button onclick="calcular()">Calcular Agora</button>
+
+    <div id="res" class="result-box">
+        <div class="result-line"><span>Provento Bruto:</span> <span id="vHE"></span></div>
+        <div class="result-line"><span>Reflexo DSR:</span> <span id="vDSR"></span></div>
+        <div class="result-line total-line"><span>Total a Pagar:</span> <span id="vTotal"></span></div>
+    </div>
+</div>
+
+<script>
+    function sugerirDias() {
+        const data = document.getElementById('mesRef').value;
+        if (!data) return;
+        
+        const [ano, mes] = data.split('-');
+        const ultimoDia = new Date(ano, mes, 0).getDate();
+        let domingos = 0;
+
+        for (let i = 1; i <= ultimoDia; i++) {
+            if (new Date(ano, mes - 1, i).getDay() === 0) domingos++;
+        }
+
+        // Sugestão padrão (Dias totais - domingos). 
+        // O usuário ajusta os feriados manualmente para precisão de 100%.
+        document.getElementById('dsr').value = domingos;
+        document.getElementById('diasUteis').value = ultimoDia - domingos;
+    }
+
+    function calcular() {
+        const salario = parseFloat(document.getElementById('salario').value);
+        const jornada = parseFloat(document.getElementById('jornada').value);
+        const qtd = parseFloat(document.getElementById('qtd').value);
+        const perc = parseFloat(document.getElementById('perc').value);
+        const tipo = document.getElementById('tipo').value;
+        const dUteis = parseFloat(document.getElementById('diasUteis').value);
+        const dDsr = parseFloat(document.getElementById('dsr').value);
+
+        if (!salario || !qtd || !dUteis || !dDsr) {
+            alert("Preencha todos os campos!");
+            return;
+        }
+
+        const valorHoraBase = salario / jornada;
+        let valorEvento = (tipo === "HE") ? (valorHoraBase * (1 + perc)) * qtd : (valorHoraBase * perc) * qtd;
+        
+        // FÓRMULA DP: (Valor das Horas / Dias Úteis) * DSR
+        const valorDSR = (valorEvento / dUteis) * dDsr;
+        const total = valorEvento + valorDSR;
+
+        document.getElementById('vHE').innerText = "R$ " + valorEvento.toLocaleString('pt-BR', {minimumFractionDigits:2});
+        document.getElementById('vDSR').innerText = "R$ " + valorDSR.toLocaleString('pt-BR', {minimumFractionDigits:2});
+        document.getElementById('vTotal').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits:2});
+        document.getElementById('res').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
