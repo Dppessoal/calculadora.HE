@@ -3,53 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora DP Pro - Recibo Oficial</title>
+    <title>Calculadora DP - RTCount</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root { --primary: #1a73e8; --secondary: #5f6368; --bg: #f4f7f6; }
+        :root { --primary: #003366; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); display: flex; justify-content: center; padding: 20px; }
         .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-        h2 { text-align: center; color: var(--primary); margin-bottom: 25px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        .section-title { font-size: 12px; color: var(--primary); text-transform: uppercase; margin: 20px 0 10px; font-weight: bold; letter-spacing: 1px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; font-weight: 600; color: #333; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #dadce0; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        h2 { text-align: center; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        label { display: block; margin: 10px 0 5px; font-size: 14px; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        button { flex: 1; padding: 16px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-calc { background-color: var(--primary); color: white; }
-        .btn-pdf { background-color: #2e7d32; color: white; display: none; }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        button { flex: 1; padding: 16px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        .btn-calc { background: var(--primary); color: white; }
+        .btn-pdf { background: #28a745; color: white; display: none; }
 
-        /* ESTILO DO RECIBO PARA O PDF */
-        #recibo-template { display: none; font-family: Arial, sans-serif; color: #000; padding: 20px; }
-        .header-recibo { border: 1px solid #000; padding: 15px; margin-bottom: 10px; }
-        .header-recibo h3 { margin: 0; text-transform: uppercase; font-size: 18px; }
-        .header-recibo p { margin: 5px 0; font-size: 14px; }
-        .info-tab { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        .info-tab td { border: 1px solid #000; padding: 8px; font-size: 13px; }
-        .table-calculo { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .table-calculo th, .table-calculo td { border: 1px solid #000; padding: 10px; text-align: left; font-size: 13px; }
-        .table-calculo th { background-color: #f2f2f2; }
-        .footer-recibo { margin-top: 40px; }
-        .assinatura-box { margin-top: 60px; border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 5px; font-size: 13px; }
+        /* ESTILO DO RECIBO PARA O PDF (PADRÃO ORLANDO MARTINS) */
+        #recibo-template { display: none; width: 190mm; padding: 10mm; color: #000; background: #fff; }
+        .box-print { border: 2px solid #000; padding: 10px; margin-bottom: 5px; }
+        .header-print { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .header-print h1 { margin: 0; font-size: 22px; }
+        .table-print { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .table-print th, .table-print td { border: 1px solid #000; padding: 8px; font-size: 12px; text-align: left; }
+        .table-print th { background: #f2f2f2; }
+        .footer-print { margin-top: 40px; display: flex; justify-content: space-between; }
+        .sign-line { border-top: 1px solid #000; width: 250px; text-align: center; margin-top: 40px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Calculadora de DP</h2>
-
-    <div class="section-title">Dados da Empresa</div>
+    <h2>Calculadora RTCount</h2>
+    
     <label>Nome da Empresa:</label>
-    <input type="text" id="empresa" placeholder="Ex: R G TAVARES DROGARIA LTDA">
+    <input type="text" id="empresa" value="RTCount">
+    
     <label>CNPJ:</label>
     <input type="text" id="cnpj" placeholder="00.000.000/0001-00">
 
-    <div class="section-title">Dados do Funcionário</div>
-    <label>Nome Completo:</label>
-    <input type="text" id="nome" placeholder="Nome do colaborador">
-    
-    <div class="section-title">Calendário e Proventos</div>
+    <label>Nome do Colaborador:</label>
+    <input type="text" id="nome" placeholder="Nome Completo">
+
     <label>Mês de Referência:</label>
     <input type="month" id="mesRef" onchange="sugerirDias()">
     
@@ -83,71 +77,79 @@
         </div>
     </div>
     
-    <label>Quantidade de Horas (Decimal):</label>
-    <input type="number" id="qtd" step="0.01" placeholder="Ex: 15.50">
+    <label>Quantidade de Horas:</label>
+    <input type="number" id="qtd" step="0.01">
 
     <div class="btn-group">
-        <button class="btn-calc" onclick="calcular()">Calcular Valores</button>
-        <button id="btnPDF" class="btn-pdf" onclick="gerarPDF()">Gerar Recibo Oficial</button>
+        <button class="btn-calc" onclick="calcular()">Calcular</button>
+        <button id="btnPDF" class="btn-pdf" onclick="gerarPDF()">Baixar Recibo PDF</button>
     </div>
 </div>
 
 <div id="recibo-template">
-    <div class="header-recibo">
-        <h3 id="pdf-empresa-nome"></h3>
-        <p><strong>CNPJ:</strong> <span id="pdf-empresa-cnpj"></span></p>
-        <p style="text-align: right; margin-top: -25px;"><strong>RECIBO DE PAGAMENTO</strong></p>
-    </div>
+    <div class="box-print">
+        <div class="header-print">
+            <div>
+                <h1 id="p-empresa">RTCount</h1>
+                <p>CNPJ: <span id="p-cnpj"></span></p>
+            </div>
+            <div style="text-align: right;">
+                <strong>RECIBO DE PAGAMENTO</strong><br>
+                Referência: <span id="p-mes"></span>
+            </div>
+        </div>
 
-    <table class="info-tab">
-        <tr>
-            <td width="70%"><strong>NOME DO FUNCIONÁRIO:</strong> <br><span id="pdf-func-nome"></span></td>
-            <td width="30%"><strong>REFERÊNCIA:</strong> <br><span id="pdf-referencia"></span></td>
-        </tr>
-    </table>
+        <p><strong>Funcionário:</strong> <span id="p-nome"></span></p>
 
-    <table class="table-calculo">
-        <thead>
-            <tr>
-                <th>Cód.</th>
-                <th>Descrição do Evento</th>
-                <th>Referência</th>
-                <th>Proventos (R$)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>SALÁRIO BASE / HORA</td>
-                <td id="pdf-ref-base"></td>
-                <td id="pdf-val-base">---</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td id="pdf-tipo-txt"></td>
-                <td id="pdf-ref-qtd"></td>
-                <td id="pdf-val-evento"></td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>REFLEXO DE DSR SOBRE ADICIONAIS</td>
-                <td id="pdf-ref-dsr-dias"></td>
-                <td id="pdf-val-dsr"></td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr style="background-color: #eee; font-weight: bold;">
-                <td colspan="3" style="text-align: right;">VALOR LÍQUIDO A RECEBER:</td>
-                <td id="pdf-val-total"></td>
-            </tr>
-        </tfoot>
-    </table>
+        <table class="table-print">
+            <thead>
+                <tr>
+                    <th>Cód</th>
+                    <th>Descrição</th>
+                    <th>Referência</th>
+                    <th>Proventos (R$)</th>
+                    <th>Descontos (R$)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>001</td>
+                    <td>SALÁRIO BASE</td>
+                    <td id="p-jor"></td>
+                    <td id="p-v-sal"></td>
+                    <td>0,00</td>
+                </tr>
+                <tr>
+                    <td>105</td>
+                    <td id="p-tipo-desc"></td>
+                    <td id="p-qtd-ref"></td>
+                    <td id="p-v-evento"></td>
+                    <td>0,00</td>
+                </tr>
+                <tr>
+                    <td>202</td>
+                    <td>REFLEXO DSR SOBRE ADICIONAIS</td>
+                    <td id="p-dsr-ref"></td>
+                    <td id="p-v-dsr"></td>
+                    <td>0,00</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr style="font-weight: bold; background: #eee;">
+                    <td colspan="3" style="text-align: right;">VALOR LÍQUIDO:</td>
+                    <td id="p-total"></td>
+                    <td>0,00</td>
+                </tr>
+            </tfoot>
+        </table>
 
-    <div class="footer-recibo">
-        <p style="font-size: 12px;">Declaro ter recebido a importância líquida discriminada neste recibo.</p>
-        <p style="text-align: right;">Data: ____/____/_______</p>
-        <div class="assinatura-box">
-            Assinatura do Funcionário
+        <div style="margin-top: 20px; font-size: 11px;">
+            <p>Declaro ter recebido a importância líquida discriminada neste recibo, referente aos adicionais do mês citado.</p>
+        </div>
+
+        <div class="footer-print">
+            <div>Data: ____/____/_______</div>
+            <div class="sign-line">Assinatura do Funcionário</div>
         </div>
     </div>
 </div>
@@ -158,64 +160,59 @@
         if (!data) return;
         const [ano, mes] = data.split('-');
         const ultimoDia = new Date(ano, mes, 0).getDate();
-        let domingos = 0;
-        for (let i = 1; i <= ultimoDia; i++) {
-            if (new Date(ano, mes - 1, i).getDay() === 0) domingos++;
-        }
-        document.getElementById('dsr').value = domingos;
-        document.getElementById('diasUteis').value = ultimoDia - domingos;
+        let dom = 0;
+        for (let i = 1; i <= ultimoDia; i++) { if (new Date(ano, mes - 1, i).getDay() === 0) dom++; }
+        document.getElementById('dsr').value = dom;
+        document.getElementById('diasUteis').value = ultimoDia - dom;
     }
 
     function calcular() {
-        const empresa = document.getElementById('empresa').value;
+        const emp = document.getElementById('empresa').value;
         const cnpj = document.getElementById('cnpj').value;
         const nome = document.getElementById('nome').value;
-        const salario = parseFloat(document.getElementById('salario').value);
-        const jornada = parseFloat(document.getElementById('jornada').value);
+        const sal = parseFloat(document.getElementById('salario').value);
+        const jor = parseFloat(document.getElementById('jornada').value);
         const qtd = parseFloat(document.getElementById('qtd').value);
         const perc = parseFloat(document.getElementById('perc').value);
         const tipo = document.getElementById('tipo').value;
-        const dUteis = parseFloat(document.getElementById('diasUteis').value);
-        const dDsr = parseFloat(document.getElementById('dsr').value);
-        const mesRef = document.getElementById('mesRef').value;
+        const u = parseFloat(document.getElementById('diasUteis').value);
+        const d = parseFloat(document.getElementById('dsr').value);
 
-        if (!salario || !qtd || !nome) { alert("Preencha Nome, Salário e Quantidade!"); return; }
+        if (!sal || !qtd || !nome) { alert("Preencha Nome, Salário e Quantidade!"); return; }
 
-        const vHoraBase = salario / jornada;
-        const vEvento = (tipo === "HE") ? (vHoraBase * (1 + perc)) * qtd : (vHoraBase * perc) * qtd;
-        const vDsr = (vEvento / dUteis) * dDsr;
+        const vHora = sal / jor;
+        const vEvento = (tipo === "HE" ? vHora * (1 + perc) : vHora * perc) * qtd;
+        const vDsr = (vEvento / u) * d;
         const total = vEvento + vDsr;
 
-        // Alimentar PDF
-        document.getElementById('pdf-empresa-nome').innerText = empresa || "NOME DA EMPRESA NÃO INFORMADO";
-        document.getElementById('pdf-empresa-cnpj').innerText = cnpj || "00.000.000/0000-00";
-        document.getElementById('pdf-func-nome').innerText = nome.toUpperCase();
-        document.getElementById('pdf-referencia').innerText = mesRef;
-        document.getElementById('pdf-ref-base').innerText = jornada + " hrs";
-        document.getElementById('pdf-val-base').innerText = vHoraBase.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-        document.getElementById('pdf-tipo-txt').innerText = (tipo === "HE" ? "HORAS EXTRAS " : "ADICIONAL NOTURNO ") + (perc*100) + "%";
-        document.getElementById('pdf-ref-qtd').innerText = qtd.toFixed(2) + " hrs";
-        document.getElementById('pdf-val-evento').innerText = vEvento.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-        document.getElementById('pdf-ref-dsr-dias').innerText = dUteis + " Úteis / " + dDsr + " DSR";
-        document.getElementById('pdf-val-dsr').innerText = vDsr.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-        document.getElementById('pdf-val-total').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        // Preencher PDF
+        document.getElementById('p-empresa').innerText = emp;
+        document.getElementById('p-cnpj').innerText = cnpj;
+        document.getElementById('p-nome').innerText = nome.toUpperCase();
+        document.getElementById('p-mes').innerText = document.getElementById('mesRef').value;
+        document.getElementById('p-jor').innerText = jor + " hrs";
+        document.getElementById('p-v-sal').innerText = vHora.toLocaleString('pt-BR', {minimumFractionDigits:2});
+        document.getElementById('p-tipo-desc').innerText = (tipo === "HE" ? "HORA EXTRA " : "ADICIONAL NOTURNO ") + (perc*100) + "%";
+        document.getElementById('p-qtd-ref').innerText = qtd.toFixed(2) + " hrs";
+        document.getElementById('p-v-evento').innerText = vEvento.toLocaleString('pt-BR', {minimumFractionDigits:2});
+        document.getElementById('p-dsr-ref').innerText = `${u} Úteis / ${d} DSR`;
+        document.getElementById('p-v-dsr').innerText = vDsr.toLocaleString('pt-BR', {minimumFractionDigits:2});
+        document.getElementById('p-total').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits:2});
 
         document.getElementById('btnPDF').style.display = 'block';
-        alert("Cálculo Finalizado! Clique em Gerar Recibo.");
     }
 
     function gerarPDF() {
         const element = document.getElementById('recibo-template');
         element.style.display = 'block';
-        const nomeArquivo = document.getElementById('nome').value.replace(/\s+/g, '_');
-        
-        html2pdf().set({
-            margin: 15,
-            filename: `Recibo_${nomeArquivo}.pdf`,
+        const opt = {
+            margin: 0,
+            filename: `Recibo_${document.getElementById('nome').value}.pdf`,
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 3, useCORS: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(element).save().then(() => {
-            element.style.display = 'none';
-        });
+        };
+        html2pdf().set(opt).from(element).save().then(() => { element.style.display = 'none'; });
     }
 </script>
 </body>
